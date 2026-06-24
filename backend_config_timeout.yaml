@@ -5,4 +5,3 @@ metadata:
   namespace: abcdesktop
 spec:
   timeoutSec: 1800
-  
