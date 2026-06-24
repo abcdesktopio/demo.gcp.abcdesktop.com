@@ -3,7 +3,7 @@ name: Patch Demo config
 on:
   push:
     paths:  
-      - '**/od.config'
+      - '**/od.config.tmpl'
 
 jobs:
   patch-demo-config:
