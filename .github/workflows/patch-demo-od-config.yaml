@@ -47,24 +47,24 @@ jobs:
 
       - name: Connect to GCP cluster
         run: |
-          gcloud container clusters get-credentials ${{ vars.GCP_CLUSTER_NAME }} --region ${{ vars.GCP_CLUSTER_REGION }} --project ${{ vars.GCP_PROJECT_ID }}
+          gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --region ${{ secrets.GCP_CLUSTER_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Try connecting to cluster
         run: |
           kubectl cluster-info
           kubectl get nodes
-          kubectl get pods -n ${{ vars.ABCDESKTOP_NAMESPACE }}
+          kubectl get pods -n ${{ secrets.ABCDESKTOP_NAMESPACE }}
 
       - name: Patch config and restart pyos
         run: |
-          kubectl create -n ${{ vars.ABCDESKTOP_NAMESPACE }} configmap abcdesktop-config --from-file=od.config -o yaml --dry-run=client | kubectl replace -n ${{ vars.ABCDESKTOP_NAMESPACE }} -f -
-          kubectl rollout restart deploy pyos-od -n ${{ vars.ABCDESKTOP_NAMESPACE }}
+          kubectl create -n ${{ secrets.ABCDESKTOP_NAMESPACE }} configmap abcdesktop-config --from-file=od.config -o yaml --dry-run=client | kubectl replace -n ${{ secrets.ABCDESKTOP_NAMESPACE }} -f -
+          kubectl rollout restart deploy pyos-od -n ${{ secrets.ABCDESKTOP_NAMESPACE }}
 
       - name: Wait for pyos to be ready
         run: |
-          kubectl rollout status deploy pyos-od -n ${{ vars.ABCDESKTOP_NAMESPACE }} --timeout=120s
+          kubectl rollout status deploy pyos-od -n ${{ secrets.ABCDESKTOP_NAMESPACE }} --timeout=120s
           
 
       - name: Verify pyos is running
         run: |
-          kubectl get pods -n ${{ vars.ABCDESKTOP_NAMESPACE }} 
+          kubectl get pods -n ${{ secrets.ABCDESKTOP_NAMESPACE }} 
