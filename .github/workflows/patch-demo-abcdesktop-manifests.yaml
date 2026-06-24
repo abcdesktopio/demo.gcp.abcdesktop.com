@@ -1,0 +1,69 @@
+name: Patch Demo manifests
+
+on:
+  push:
+    paths-ignore:  
+      - '**/od.config.tmpl'
+      - '**/.github/**'
+
+jobs:
+  patch-demo-config:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Install envsubst
+        run: sudo apt-get update && sudo apt-get install -y gettext-base
+
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}  
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: install gke-gcloud-auth-plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+
+      - name: Connect to GCP cluster
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.GCP_CLUSTER_NAME }} --region ${{ secrets.GCP_CLUSTER_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Try connecting to cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get pods -n ${{ secrets.ABCDESKTOP_NAMESPACE }}
+
+      - name: Apply modified YAML manifests
+        id: apply-manifests
+        env:
+          DEMO_GCP_ABCDESKTOP_COM_X_API_KEY: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_X_API_KEY }}
+        run: |
+          CHANGED_YAML=$(git diff --name-only HEAD~1 HEAD -- '*.yaml')
+          {
+            echo "changed_yaml<<EOF"
+            echo "$CHANGED_YAML"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          if [ -z "$CHANGED_YAML" ]; then
+            echo "No YAML manifests changed in this commit, skipping kubectl apply."
+          else
+            echo "Modified YAML files:"
+            echo "$CHANGED_YAML"
+            for f in $CHANGED_YAML; do
+              echo "Applying $f ..."
+              if [ "$(basename "$f")" = "cronjob.yaml" ]; then
+                envsubst '${DEMO_GCP_ABCDESKTOP_COM_X_API_KEY}' < "$f" | kubectl apply -f - -n ${{ secrets.ABCDESKTOP_NAMESPACE }}
+              else
+                kubectl apply -f "$f" -n ${{ secrets.ABCDESKTOP_NAMESPACE }}
+              fi
+            done
+          fi
