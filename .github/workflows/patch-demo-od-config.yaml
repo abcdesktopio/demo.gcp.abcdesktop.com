@@ -16,7 +16,7 @@ jobs:
       - name: Install envsubst
         run: sudo apt-get update && sudo apt-get install -y gettext-base
 
-      - name: test secrets injection
+      - name: Inject secrets into od.config.tmpl and generate od.config
         env:
           DEMO_GCP_ABCDESKTOP_COM_X_API_KEY: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_X_API_KEY }}
           DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_ID }}
