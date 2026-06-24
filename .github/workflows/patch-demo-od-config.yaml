@@ -1,0 +1,70 @@
+name: Patch Demo config
+
+on:
+  push:
+    paths:  
+      - '**/od.config'
+
+jobs:
+  patch-demo-config:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install envsubst
+        run: sudo apt-get update && sudo apt-get install -y gettext-base
+
+      - name: test secrets injection
+        env:
+          DEMO_GCP_ABCDESKTOP_COM_X_API_KEY: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_X_API_KEY }}
+          DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_ID }}
+          DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_SECRET: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_GOOGLE_CLIENT_SECRET }}
+          DEMO_GCP_ABCDESKTOP_COM_ORANGE_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_ORANGE_CLIENT_ID }}
+          DEMO_GCP_ABCDESKTOP_COM_ORANGE_CLIENT_SECRET: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_ORANGE_CLIENT_SECRET }}
+          DEMO_GCP_ABCDESKTOP_COM_GITHUB_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_GITHUB_CLIENT_ID }}
+          DEMO_GCP_ABCDESKTOP_COM_GITHUB_CLIENT_SECRET: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_GITHUB_CLIENT_SECRET }}
+          DEMO_GCP_ABCDESKTOP_COM_LINKEDIN_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_LINKEDIN_CLIENT_ID }}
+          DEMO_GCP_ABCDESKTOP_COM_LINKEDIN_CLIENT_SECRET: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_LINKEDIN_CLIENT_SECRET }}
+          DEMO_GCP_ABCDESKTOP_COM_DISCORD_CLIENT_ID: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_DISCORD_CLIENT_ID }}
+          DEMO_GCP_ABCDESKTOP_COM_DISCORD_CLIENT_SECRET: ${{ secrets.DEMO_GCP_ABCDESKTOP_COM_DISCORD_CLIENT_SECRET }}
+        run: |
+          envsubst < ./od.config.tmpl > ./od.config
+
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: ${{ vars.GCP_PROJECT_ID }}  
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: install gke-gcloud-auth-plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+
+      - name: Connect to GCP cluster
+        run: |
+          gcloud container clusters get-credentials ${{ vars.GCP_CLUSTER_NAME }} --region ${{ vars.GCP_CLUSTER_REGION }} --project ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Try connecting to cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get pods -n ${{ vars.ABCDESKTOP_NAMESPACE }}
+
+      - name: Patch config and restart pyos
+        run: |
+          kubectl create -n ${{ vars.ABCDESKTOP_NAMESPACE }} configmap abcdesktop-config --from-file=od.config -o yaml --dry-run=client | kubectl replace -n ${{ vars.ABCDESKTOP_NAMESPACE }} -f -
+          kubectl rollout restart deploy pyos-od -n ${{ vars.ABCDESKTOP_NAMESPACE }}
+
+      - name: Wait for pyos to be ready
+        run: |
+          kubectl rollout status deploy pyos-od -n ${{ vars.ABCDESKTOP_NAMESPACE }} --timeout=120s
+          
+
+      - name: Verify pyos is running
+        run: |
+          kubectl get pods -n ${{ vars.ABCDESKTOP_NAMESPACE }} 
