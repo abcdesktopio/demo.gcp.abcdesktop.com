@@ -765,7 +765,7 @@ desktop.pod : {
   #
   'ephemeral_container': {
     'enable': True,
-    'imagePullPolicy': 'IfNotPresent',
+    'imagePullPolicy': 'Always',
     'volumes': [ 'x11socket', 'tmp', 'run', 'log', 'rundbus', 'runuser', 'shm' ],
     'acl':  { 'permit': [ 'all' ] },
     'securityContext': { 
