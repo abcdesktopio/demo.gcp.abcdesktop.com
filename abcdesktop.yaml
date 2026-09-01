@@ -1165,6 +1165,17 @@ spec:
         netpol/router: 'true'
         netpol/nginx: 'true'
     spec:
+      # Important for high availability, ensure that pyos pods are not scheduled on the same node
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: run
+                    operator: In
+                    values:
+                      - pyos-od
+              topologyKey: "kubernetes.io/hostname"
       initContainers:
       - name: wait-for-mongo
         image: ghcr.io/abcdesktopio/mongo:safe8.0
