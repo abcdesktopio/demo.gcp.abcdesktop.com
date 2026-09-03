@@ -34,7 +34,6 @@ spec:
             - name: EXPIREIN
               value: '900'
             - name: FORCE
-              value: 'false'
+              value: 'true'
           restartPolicy: OnFailure
-          dnsPolicy: ClusterFirst
-          
+          dnsPolicy: ClusterFirst   
