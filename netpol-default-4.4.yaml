@@ -393,15 +393,15 @@ spec:
     ports:
     - protocol: TCP
       port: 6000
-  #- ports:
-  #  - protocol: TCP
-  #    port: 53
-  #  - protocol: UDP
-  #    port: 53
-  #  - protocol: TCP
-  #    port: 443
-  #  - protocol: TCP
-  #    port: 80
+  - ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
   #  - protocol: UDP
   #    port: 88
   #  - protocol: TCP
