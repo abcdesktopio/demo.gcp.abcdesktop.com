@@ -402,10 +402,10 @@ spec:
       port: 443
     - protocol: TCP
       port: 80
-  #  - protocol: UDP
-  #    port: 88
-  #  - protocol: TCP
-  #    port: 88
+    - protocol: UDP
+      port: 88
+    - protocol: TCP
+      port: 88
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
