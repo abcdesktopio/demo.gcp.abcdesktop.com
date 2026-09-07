@@ -393,11 +393,24 @@ spec:
     ports:
     - protocol: TCP
       port: 6000
-  - ports:
+  - to:
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
     - protocol: TCP
       port: 53
     - protocol: UDP
       port: 53
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 34.144.244.221/32
+    ports:
     - protocol: TCP
       port: 443
     - protocol: TCP
@@ -473,24 +486,36 @@ spec:
     - protocol: TCP
       port: 29789
   egress:
-  # pod user can run dns query 
-  - ports:
+  - to:
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    # pod user can run any dns query
+    ports:
     - protocol: TCP
       port: 53
     - protocol: UDP
       port: 53
-  # permit www website
-  - ports:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 34.144.244.221/32
+    ports:
+    # permit www website
     - protocol: TCP
       port: 443
     - protocol: TCP
       port: 80
-  # permit kerberos
-  - ports: 
+    # permit kerberos
     - protocol: UDP
       port: 88
     - protocol: TCP
       port: 88
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
