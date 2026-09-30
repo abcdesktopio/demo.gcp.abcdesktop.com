@@ -135,7 +135,7 @@ jwt_token_desktop : {
 
 # CONTROLLERS SECTION #
 #
-controllers: { 'ManagerController': { 'apikey': [ '${DEMO_GCP_ABCDESKTOP_COM_X_API_KEY}' ], 'permitip': [ '161.105.208.3/32', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fd00::/8', '169.254.0.0/16', '127.0.0.0/8' ] },
+controllers: { 'ManagerController': { 'apikey': [ '${DEMO_GCP_ABCDESKTOP_COM_X_API_KEY}' ], 'permitip': [ '${DEMO_GCP_ABCDESKTOP_COM_X_API_IP_ADDR_0}', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fd00::/8', '169.254.0.0/16', '127.0.0.0/8' ] },
                'AccountingController': { 'apikey': [ 'demo' ], 'permitip': [  '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', 'fd00::/8', '169.254.0.0/16', '127.0.0.0/8' ] },
                'StoreController':   { 'wrapped_key': {} },
                'ComposerController' : { 'requestsallowed' : { 'getdesktopdescription': False } },
