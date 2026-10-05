@@ -658,7 +658,7 @@ desktop.pod : {
   'graphical' : {
     'image': { 'default': 'ghcr.io/abcdesktopio/oc.user.ubuntu.24.04:4.4' },
     'volumes': [ 'x11socket', 'tmp', 'run', 'log', 'rundbus', 'runuser', 'shm' ],
-    'imagePullPolicy': 'Always',
+    'imagePullPolicy': 'IfNotPresent',
     'enable': True,
     'acl': { 'permit': [ 'all' ] },
     'waitportbin' : '/composer/node/wait-port/node_modules/.bin/wait-port',
