@@ -903,44 +903,6 @@ spec:
           configMap:
             name: version-config
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: openldap-od
-  labels:
-    abcdesktop/role: openldap
-spec:
-  selector:
-    matchLabels:
-      run: openldap-od
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        run: openldap-od
-        netpol/dns: 'true'
-    spec:
-      automountServiceAccountToken: false
-      containers:
-      - name: openldap
-        # abcdesktopio/docker-test-openldap:master
-        # is same as https://github.com/rroemhild/docker-test-openldap
-        # but with posixAccount support
-        image: ghcr.io/abcdesktopio/docker-test-openldap:4.4
-        imagePullPolicy: Always
-        securityContext:
-          allowPrivilegeEscalation: false
-        resources:
-          limits:
-            cpu: 0.5
-            memory: 2048Mi
-          requests:
-            cpu: 0.1
-            memory: 128Mi
-        ports:
-          - containerPort: 389
-          - containerPort: 636
----
 apiVersion: v1 
 kind: Service 
 metadata: 
@@ -1050,22 +1012,3 @@ spec:
   - protocol: TCP
     port: 80
     name: http
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: openldap
-  labels:
-    abcdesktop/role: openldap
-spec:
-  selector:
-    run: openldap-od
-  ports:
-  - name: ldap
-    protocol: TCP
-    port: 389
-    targetPort: 389
-  - name: ldaps
-    protocol: TCP
-    port: 636
-    targetPort: 636
